@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Formatter - Web Utilities</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">← Back to Utilities</a>
+        <div class="tool-section">
+            <h2>JSON Formatter</h2>
+            <div class="json-container">
+                <textarea id="json-input" placeholder="Enter JSON to format"></textarea>
+                <button onclick="formatJSON()">Format JSON</button>
+                <textarea id="json-output" readonly></textarea>
+                <button class="copy-button" onclick="copyToClipboard('json-output')">Copy</button>
+                <div class="success-message"></div>
+            </div>
+        </div>
+    </div>
+    <script src="json-formatter.js"></script>
+</body>
+</html> 

@@ -1,0 +1,170 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    padding: 20px;
+    background-color: #f0f2f5;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.utilities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.utility-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.utility-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.utility-card h2 {
+    color: #2196F3;
+    margin-bottom: 10px;
+}
+
+.utility-card p {
+    color: #666;
+}
+
+/* Styles for utility pages */
+.tool-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px auto;
+    max-width: 800px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.back-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #2196F3;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+textarea, input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 10px 0;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.success-message {
+    color: #4CAF50;
+    padding: 10px;
+    display: none;
+}
+
+.error-message {
+    color: #f44336;
+    padding: 10px;
+    display: none;
+}
+
+.copy-button {
+    background-color: #2196F3;
+    margin-left: 10px;
+}
+
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+h2 {
+    margin-bottom: 20px;
+    color: #444;
+}
+
+#qr-output {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.base64-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .base64-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.toggle-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.toggle-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.toggle-button.active {
+    background-color: #2196F3;
+    color: white;
+}
+
+.mode-section {
+    transition: opacity 0.3s ease;
+}

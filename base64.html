@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base64 Tools - Web Utilities</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">← Back to Utilities</a>
+        <div class="tool-section">
+            <h2>Base64 Tools</h2>
+            <div class="toggle-container">
+                <button class="toggle-button" data-mode="decode" onclick="toggleMode('decode')">Decode</button>
+                <button class="toggle-button" data-mode="encode" onclick="toggleMode('encode')">Encode</button>
+            </div>
+            <div id="encode-section" class="mode-section" style="display: none;">
+                <textarea id="encode-input" placeholder="Enter text to encode"></textarea>
+                <button onclick="encodeBase64()">Encode</button>
+                <textarea id="encode-output" readonly></textarea>
+                <button class="copy-button" onclick="copyToClipboard('encode-output')">Copy</button>
+                <div class="success-message"></div>
+            </div>
+            <div id="decode-section" class="mode-section">
+                <textarea id="decode-input" placeholder="Enter base64 to decode"></textarea>
+                <button onclick="decodeBase64()">Decode</button>
+                <textarea id="decode-output" readonly></textarea>
+                <button class="copy-button" onclick="copyToClipboard('decode-output')">Copy</button>
+                <div class="success-message"></div>
+            </div>
+        </div>
+    </div>
+    <script src="base64.js"></script>
+</body>
+</html> 
