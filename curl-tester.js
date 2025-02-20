@@ -3,16 +3,17 @@ let rawResponse = null;
 
 function parseCurl(curlCommand) {
     try {
-        // Remove 'curl' from the beginning if present
         curlCommand = curlCommand.trim().replace(/^curl\s+/, '');
 
         const request = {
             method: 'GET',
-            headers: {},
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
             body: null
         };
 
-        // Parse URL
         const urlMatch = curlCommand.match(/['"]([^'"]+)['"]/);
         if (urlMatch) {
             request.url = urlMatch[1];
@@ -20,23 +21,18 @@ function parseCurl(curlCommand) {
             request.url = curlCommand.split(' ')[0];
         }
 
-        // Parse headers
         const headerMatches = curlCommand.matchAll(/-H\s+['"]([^'"]+)['"]/g);
         for (const match of headerMatches) {
             const [key, value] = match[1].split(': ');
             request.headers[key] = value;
         }
 
-        // Parse method
-        const methodMatch = curlCommand.match(/-X\s+(['"]?)(\w+)\1/);
-        if (methodMatch) {
-            request.method = methodMatch[2];
-        }
+        const methodDropdown = document.getElementById('method-select');
+        request.method = methodDropdown.value;
 
-        // Parse data
         const dataMatch = curlCommand.match(/-d\s+['"]([^'"]+)['"]/);
         if (dataMatch) {
-            request.method = request.method || 'POST';
+            request.method = 'POST';
             try {
                 request.body = JSON.parse(dataMatch[1]);
             } catch {
@@ -54,27 +50,19 @@ async function convertAndExecute() {
     const curlInput = document.getElementById('curl-input').value;
     const requestDetails = document.getElementById('request-details');
     const responseOutput = document.getElementById('response-output');
-    
+
     try {
-        // Parse CURL command
         const request = parseCurl(curlInput);
-        
-        // Display request details
         requestDetails.textContent = JSON.stringify(request, null, 2);
-        
-        // Execute request
+
         const response = await fetch(request.url, {
             method: request.method,
             headers: request.headers,
             body: request.body ? JSON.stringify(request.body) : null
         });
-        
-        // Store raw response
+
         rawResponse = await response.text();
-        
-        // Format and display response
         formatResponse();
-        
         showMessage('Request executed successfully!', 'success');
     } catch (error) {
         showMessage(error.message, 'error');
@@ -130,4 +118,4 @@ function showMessage(message, type) {
     setTimeout(() => {
         messageElement.style.display = 'none';
     }, 3000);
-} 
+}
