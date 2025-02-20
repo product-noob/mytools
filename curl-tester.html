@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CURL Tester - Web Utilities</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">← Back to Utilities</a>
+        <div class="tool-section">
+            <h2>CURL Tester</h2>
+            <div class="curl-container">
+                <textarea id="curl-input" placeholder="Paste your CURL command here..."></textarea>
+                <div class="button-group">
+                    <button onclick="convertAndExecute()" class="primary-button">Execute</button>
+                    <button onclick="clearAll()" class="secondary-button">Clear</button>
+                </div>
+                
+                <div class="output-section">
+                    <div class="output-header">
+                        <h3>Request Details</h3>
+                        <button class="copy-button" onclick="copyToClipboard('request-details')" data-tooltip="Copy request details">Copy</button>
+                    </div>
+                    <pre id="request-details" class="output-pre"></pre>
+                    
+                    <div class="output-header">
+                        <h3>Response</h3>
+                        <div class="response-controls">
+                            <select id="response-format" onchange="formatResponse()">
+                                <option value="json">JSON</option>
+                                <option value="raw">Raw</option>
+                            </select>
+                            <button class="copy-button" onclick="copyToClipboard('response-output')" data-tooltip="Copy response">Copy</button>
+                        </div>
+                    </div>
+                    <pre id="response-output" class="output-pre"></pre>
+                </div>
+                
+                <div id="error-message" class="error-message"></div>
+                <div id="success-message" class="success-message"></div>
+            </div>
+        </div>
+    </div>
+    <script src="curl-tester.js"></script>
+</body>
+</html> 
