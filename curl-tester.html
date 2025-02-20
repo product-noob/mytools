@@ -13,16 +13,13 @@
             <h2>CURL Tester</h2>
             <div class="curl-container">
                 <textarea id="curl-input" placeholder="Paste your CURL command here..."></textarea>
-                
-                <label for="method-select">Request Method:</label>
-                <select id="method-select">
-                    <option value="GET">GET</option>
-                    <option value="POST">POST</option>
-                </select>
-                
                 <div class="button-group">
-                    <button onclick="convertAndExecute()" class="primary-button">Execute</button>
-                    <button onclick="clearAll()" class="secondary-button">Clear</button>
+                    <select id="method-select">
+                        <option value="fetch">Fetch (Auto-detect)</option>
+                        <option value="get">GET</option>
+                    </select>
+                    <button id="execute-btn" class="primary-button">Execute</button>
+                    <button id="clear-btn" class="secondary-button">Clear</button>
                 </div>
                 
                 <div class="output-section">
