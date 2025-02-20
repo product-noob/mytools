@@ -1,126 +1,156 @@
-// Store the raw response for formatting
-let rawResponse = null;
-
-function parseCurl(curlCommand) {
-    try {
-        curlCommand = curlCommand.trim().replace(/^curl\s+/, '');
-
-        const request = {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Origin': 'https://fake-origin.com',
-                'Referer': 'https://fake-referer.com',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            },
-            body: null
+class CurlTester {
+    constructor() {
+        this.elements = {
+            curlInput: document.getElementById('curl-input'),
+            methodSelect: document.getElementById('method-select'),
+            executeBtn: document.getElementById('execute-btn'),
+            clearBtn: document.getElementById('clear-btn'),
+            requestDetails: document.getElementById('request-details'),
+            responseOutput: document.getElementById('response-output'),
+            responseFormat: document.getElementById('response-format'),
+            errorMessage: document.getElementById('error-message'),
+            successMessage: document.getElementById('success-message')
         };
+        this.rawResponse = '';
+        this.init();
+    }
 
-        const urlMatch = curlCommand.match(/--location\s+['"]([^'"]+)['"]/);
-        if (urlMatch) {
-            request.url = urlMatch[1];
-        } else {
-            request.url = curlCommand.split(' ')[0];
-        }
+    init() {
+        this.elements.executeBtn.addEventListener('click', () => this.executeRequest());
+        this.elements.clearBtn.addEventListener('click', () => this.clearAll());
+    }
 
-        const headerMatches = curlCommand.matchAll(/--header\s+['"]([^'"]+)['"]/g);
-        for (const match of headerMatches) {
-            const [key, value] = match[1].split(': ');
-            if (key && value) {
-                request.headers[key.trim()] = value.trim();
+    parseCurl(curlCommand) {
+        try {
+            const headers = new Headers();
+            let url = '';
+            let body = null;
+            let method = 'GET';
+
+            const parts = curlCommand.replace(/^curl\s+/, '').split(/\s+/);
+            
+            for (let i = 0; i < parts.length; i++) {
+                const part = parts[i].trim();
+                
+                if (part.startsWith('http') && !url) {
+                    url = part.replace(/^['"]|['"]$/g, '');
+                }
+                
+                if (part === '-H' || part === '--header') {
+                    const header = parts[++i].replace(/^['"]|['"]$/g, '');
+                    const [key, value] = header.split(/:\s*(.+)/);
+                    if (key && value) headers.append(key, value);
+                }
+                
+                if (part === '-d' || part === '--data') {
+                    body = parts[++i].replace(/^['"]|['"]$/g, '');
+                    method = 'POST';
+                }
+                
+                if (part === '-X' || part === '--request') {
+                    method = parts[++i].toUpperCase();
+                }
             }
+
+            if (!url) throw new Error('No URL found in CURL command');
+            return { url, method, headers, body };
+        } catch (error) {
+            throw new Error('Invalid CURL command: ' + error.message);
         }
+    }
 
-        const methodDropdown = document.getElementById('method-select');
-        request.method = methodDropdown.value;
+    async executeRequest() {
+        try {
+            this.setLoading(true);
+            this.clearMessages();
+            
+            const curl = this.elements.curlInput.value.trim();
+            if (!curl) throw new Error('Please enter a CURL command');
 
-        const dataMatch = curlCommand.match(/--data\s+(['"])(.*?)\1/s);
-        if (dataMatch) {
-            request.method = 'POST';
-            try {
-                request.body = JSON.parse(dataMatch[2]);
-            } catch {
-                request.body = dataMatch[2];
+            const { url, method: curlMethod, headers, body } = this.parseCurl(curl);
+            const selectedMethod = this.elements.methodSelect.value;
+            const method = selectedMethod === 'get' ? 'GET' : 
+                          selectedMethod === 'fetch' ? curlMethod : selectedMethod;
+
+            const options = {
+                method,
+                headers: Object.fromEntries(headers),
+            };
+
+            if (body) {
+                options.body = body;
+                if (!headers.has('Content-Type')) {
+                    options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                }
             }
+
+            // Display request details
+            this.elements.requestDetails.textContent = 
+                `URL: ${url}\nMethod: ${method}\nHeaders: ${JSON.stringify(options.headers, null, 2)}${body ? `\nBody: ${body}` : ''}`;
+
+            const response = await fetch(url, options);
+            this.rawResponse = await response.text();
+            
+            this.formatResponse();
+            this.showSuccess(`Request completed with status: ${response.status} ${response.statusText}`);
+        } catch (error) {
+            this.showError(error.message);
+        } finally {
+            this.setLoading(false);
         }
-
-        return request;
-    } catch (error) {
-        throw new Error('Invalid CURL command');
     }
-}
 
-async function convertAndExecute() {
-    const curlInput = document.getElementById('curl-input').value;
-    const requestDetails = document.getElementById('request-details');
-    const responseOutput = document.getElementById('response-output');
-
-    try {
-        const request = parseCurl(curlInput);
-        requestDetails.textContent = JSON.stringify(request, null, 2);
-
-        const response = await fetch(request.url, {
-            method: request.method,
-            headers: request.headers,
-            body: request.body ? JSON.stringify(request.body) : null
-        });
-
-        rawResponse = await response.text();
-        formatResponse();
-        showMessage('Request executed successfully!', 'success');
-    } catch (error) {
-        showMessage(error.message, 'error');
-        requestDetails.textContent = '';
-        responseOutput.textContent = '';
-    }
-}
-
-function formatResponse() {
-    const format = document.getElementById('response-format').value;
-    const responseOutput = document.getElementById('response-output');
-    
-    if (!rawResponse) {
-        responseOutput.textContent = '';
-        return;
-    }
-    
-    try {
-        if (format === 'json') {
-            const jsonData = JSON.parse(rawResponse);
-            responseOutput.textContent = JSON.stringify(jsonData, null, 2);
-        } else {
-            responseOutput.textContent = rawResponse;
+    formatResponse() {
+        const format = this.elements.responseFormat.value;
+        try {
+            if (format === 'json' && this.rawResponse) {
+                const json = JSON.parse(this.rawResponse);
+                this.elements.responseOutput.textContent = JSON.stringify(json, null, 2);
+            } else {
+                this.elements.responseOutput.textContent = this.rawResponse;
+            }
+        } catch {
+            this.elements.responseOutput.textContent = this.rawResponse;
         }
-    } catch {
-        responseOutput.textContent = rawResponse;
     }
-}
 
-function clearAll() {
-    document.getElementById('curl-input').value = '';
-    document.getElementById('request-details').textContent = '';
-    document.getElementById('response-output').textContent = '';
-    rawResponse = null;
+    clearAll() {
+        this.elements.curlInput.value = '';
+        this.elements.requestDetails.textContent = '';
+        this.elements.responseOutput.textContent = '';
+        this.rawResponse = '';
+        this.clearMessages();
+    }
+
+    setLoading(isLoading) {
+        this.elements.executeBtn.disabled = isLoading;
+        document.querySelector('.curl-container').classList.toggle('loading', isLoading);
+        this.elements.executeBtn.textContent = isLoading ? 'Executing...' : 'Execute';
+    }
+
+    showError(message) {
+        this.elements.errorMessage.textContent = message;
+        this.elements.errorMessage.style.display = 'block';
+        this.elements.successMessage.style.display = 'none';
+    }
+
+    showSuccess(message) {
+        this.elements.successMessage.textContent = message;
+        this.elements.successMessage.style.display = 'block';
+        this.elements.errorMessage.style.display = 'none';
+    }
+
+    clearMessages() {
+        this.elements.errorMessage.style.display = 'none';
+        this.elements.successMessage.style.display = 'none';
+    }
 }
 
 function copyToClipboard(elementId) {
-    const element = document.getElementById(elementId);
-    const text = element.textContent;
-    
-    navigator.clipboard.writeText(text).then(() => {
-        showMessage('Copied to clipboard!', 'success');
-    }).catch(() => {
-        showMessage('Failed to copy to clipboard', 'error');
-    });
+    const text = document.getElementById(elementId).textContent;
+    navigator.clipboard.writeText(text)
+        .then(() => alert('Copied to clipboard!'))
+        .catch(() => alert('Failed to copy'));
 }
 
-function showMessage(message, type) {
-    const messageElement = document.getElementById(`${type}-message`);
-    messageElement.textContent = message;
-    messageElement.style.display = 'block';
-    
-    setTimeout(() => {
-        messageElement.style.display = 'none';
-    }, 3000);
-}
+new CurlTester();
