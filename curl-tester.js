@@ -17,29 +17,31 @@ function parseCurl(curlCommand) {
             body: null
         };
 
-        const urlMatch = curlCommand.match(/['"]([^'"]+)['"]/);
+        const urlMatch = curlCommand.match(/--location\s+['"]([^'"]+)['"]/);
         if (urlMatch) {
             request.url = urlMatch[1];
         } else {
             request.url = curlCommand.split(' ')[0];
         }
 
-        const headerMatches = curlCommand.matchAll(/-H\s+['"]([^'"]+)['"]/g);
+        const headerMatches = curlCommand.matchAll(/--header\s+['"]([^'"]+)['"]/g);
         for (const match of headerMatches) {
             const [key, value] = match[1].split(': ');
-            request.headers[key] = value;
+            if (key && value) {
+                request.headers[key.trim()] = value.trim();
+            }
         }
 
         const methodDropdown = document.getElementById('method-select');
         request.method = methodDropdown.value;
 
-        const dataMatch = curlCommand.match(/-d\s+['"]([^'"]+)['"]/);
+        const dataMatch = curlCommand.match(/--data\s+(['"])(.*?)\1/s);
         if (dataMatch) {
             request.method = 'POST';
             try {
-                request.body = JSON.parse(dataMatch[1]);
+                request.body = JSON.parse(dataMatch[2]);
             } catch {
-                request.body = dataMatch[1];
+                request.body = dataMatch[2];
             }
         }
 
